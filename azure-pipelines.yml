@@ -8,14 +8,4 @@ steps:
 - script: |
     echo "Hello AZ-400"
     echo "YAML pipeline is running!"
-  displayName: 'Run Hello AZ-400'trigger:
-- main
-
-pool:
-  vmImage: ubuntu-latest
-
-steps:
-- script: |
-    echo "Hello AZ-400"
-    echo "YAML pipeline is running!"
   displayName: 'Run Hello AZ-400'
