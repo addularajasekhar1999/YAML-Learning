@@ -1,0 +1,106 @@
+trigger:
+  - main
+
+pool:
+  vmImage: Ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Building Salesforce"
+
+  - stage: Test
+    dependsOn: Build
+    jobs:
+      - job: TestJob
+        steps:
+          - script: echo "Testing Salesforce"
+
+  - stage: Deploy
+    dependsOn: Test
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: echo "Deploying Salesforce"
+
+
+
+---
+
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Building Salesforce"
+
+  - stage: Test
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: TestJob
+        steps:
+          - script: echo "Testing Salesforce"
+
+  - stage: Deploy
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: echo "Deploying Salesforce"
+
+---
+ 
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Building Salesforce"
+
+  - stage: Test
+    dependsOn: Build
+    condition : succeeded()
+    jobs:
+      - job: TestJob
+        steps:
+          - script: |
+              echo "Running tests"
+              exit 1
+  - stage: Deploy
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: echo "Deploying Salesforce"
+
+---
+
+trigger:
+  - main
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - name: environment
+    value: 'DP05'
+
+stages:
+  - stage: Build
+  

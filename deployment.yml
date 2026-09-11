@@ -1,0 +1,30 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+parameters:
+  - name: environment
+    type: string
+    default: "DP01"
+    values:
+      - "DP01"
+      - "DP05"
+      - "Production"
+
+variables:
+  appName: "Salesforce"
+  deploymentType: "Full"
+
+steps:
+  - script: |
+      echo "Deployment: $(appName)"
+      echo "Deployment type: $(deploymentType)"
+      echo "Build: $(Build.BuildId)"
+      echo "target environment: ${{parameters.environment}}"
+      echo "Deployment started"
+      echo "Running test cases"
+      echo "Deployment completed"
+
+---

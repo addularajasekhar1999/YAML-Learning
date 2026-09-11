@@ -1,0 +1,128 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: echo "Hello Raj"
+  - script: echo "I am learning Azure Pipelines"
+  - script: echo "YAML is powerful"
+
+---
+
+
+trigger:
+ - main
+
+pool:
+ vmImage: ubuntu-latest
+
+steps:
+ - script: echo "Starting pipeline"
+ - script: echo "Building application"
+ - script: echo "Pipeline completed"
+
+---
+
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      echo "Starting build"
+      echo "Running test"
+      echo "Build completed"
+---
+steps:
+  - script: |
+      echo "Build started"
+      echo "Running tests"
+      echo "Build finished"
+
+---
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  appName: "Salesforce"
+  environment: "DP01"
+
+steps:
+  script: |
+    echo "Deploying: $(appName)"
+    echo "Target environment: $(environment)"
+    echo "Deployment started"
+
+---
+ 
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  appName: "Salesforce"
+  environment: "DP05"
+  version: "3.1"
+
+steps:
+  - script: |
+      echo "Deployment: $(appName)"
+      echo "Target environment: $(environment)"
+      echo "Version: $(version)"
+      echo "Deployment started"
+      echo "Running test cases"
+      echo "Deployment completed"
+
+---
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  appName: "Salesforce"
+  environment: "DP05"
+  deploymentType: "3.1"  
+
+steps:
+  - script: |
+      echo "Deployment: $(appName)"
+      echo "Target environment: $(environment)"
+      echo "Deployment type: $(deploymentType)"
+      echo "Build: $(Build.BuildId)"
+      echo "Deployment started"
+      echo "Running test cases"
+      echo "Deployment completed"
+  
+---
+
+parameters:
+  - name: environment
+    type: string
+    default: "DP01"
+    values:
+      - DP01
+      - DP05
+      - Production
+
+variables:
+  appName: "Salesforce"
+
+steps:
+ - script: |
+     echo "Deployment: $(appName)"
+     echo "Target environment: ${{ parameters.environment }}"
+     echo "Build: $(Build.BuildId)"
+     echo "Deployment started"
+     echo "Running test cases"
+     echo "Deployment completed"

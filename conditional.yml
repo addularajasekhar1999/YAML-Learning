@@ -1,0 +1,37 @@
+trigger:
+  - main
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  environment: 'DP05'
+  appName: 'Salesforce'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Building Salesforce"
+
+  - stage: Test
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+      - job: TestJob
+        steps:
+            - script: |
+               echo "Running unit tests"
+               echo "All tests passed"
+
+  - stage: Deploy
+    dependsOn: Test
+    condition: and(succeeded(),  eq(variables['environment'], 'DP05')
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: |
+              echo "Deploying $(appName) to $(environment)"
+              echo  "Deployment successful"
+                 
+        

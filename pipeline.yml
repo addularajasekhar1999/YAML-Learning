@@ -1,0 +1,26 @@
+trigger:
+  - main
+  
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Building Salesforce"
+  - stage: Test
+    jobs:
+      - job: TestJob
+        steps:
+          - script: echo "Testing Salesforce"
+      
+  - stage: Deploy
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: echo "Deploying Salesforce"
+
+
+  
