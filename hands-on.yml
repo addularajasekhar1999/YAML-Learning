@@ -1,0 +1,166 @@
+ - stage: Deploy
+   dependsOn: Test
+   condition: succeeded()
+   
+ - stage: Deploy
+   dependsOn: Test
+   condition: and(succeeded(),
+              eq(variables['environment'], 'DP05')) 
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(succeeded(),
+             ne(variables['environment'], 'Production'))
+
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(succeeded(),
+             eq(variables['environment'], 'DP05'))
+
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(succeeded(),
+             or(
+               eq(variables['environment'], 'DP01'),
+               eq(variables['environment'], 'DP05')
+             ),
+               ne(variables['environment'], 'Production')
+             )
+
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(
+             succeeded(),        
+             eq(variables['environment'], 'DP05'),
+             eq(variables['Build.SourceBranch'], 'refs/heads/main')
+             )
+
+Q. Requirement:
+
+Deploy Salesforce when:
+Tests succeeded 
+AND
+(environment is DP01 OR DP05)
+AND
+branch is either main OR release
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(
+             succeeded(),
+             or(
+               eq(variables['environment'], 'DP01'),
+               eq(variables['environment'], 'DP05')
+             ),
+             or(
+               eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+               eq(variables['Build.SourceBranch'], 'refs/heads/release')
+             )
+             )
+
+
+Q. Requirement:
+Deploy Salesforce only when:
+Tests succeeded
+AND
+environment is DP01 OR DP05
+AND
+branch is main OR release
+AND
+environment is NOT Production
+
+- stage: Deploy
+  dependsOn: Test
+  condition: and(
+             succeeded(),
+             or(
+               eq(variables['environment'], 'DP01'),
+               eq(variables['environment'], 'DP05')
+             ),
+             or(
+               eq(variables['Build.SourceBranch'], 'refs/heads/main'),
+               eq(variables['Build.SourceBranch'], 'refs/heads/release')
+             ),
+               ne(variables['environment'], 'Production')
+             )
+
+Q.Requirement : Run FailureHandling only when the Test stage fails.
+
+ - stage: FailureHandling
+   dependsOn: Test
+   condition: failed()
+
+Q. Requirement : Cleanup must run regardless of the result of Test.
+ 
+ - stage: Cleanup
+   dependsOn: Test
+   condition: always()
+
+
+Q. Requirement : PublishResults should run if Test succeeded OR failed.
+
+ - stage: PublishResults
+   dependsOn: Test
+   condition: succeededOrFailed()
+
+Q. Run the deployment when the environment is DP01, DP05, or UAT.
+
+ - stage: Deploy
+   dependsOn: Test
+   condition: in(
+              variables['environment'],
+              'DP01',
+              'DP05',
+              'UAT'
+              )
+
+Note: 🧠 in() vs or(eq())
+
+These two can express the same idea:
+or() approach
+or(
+  eq(variables['environment'], 'DP01'),
+  eq(variables['environment'], 'DP05'),
+  eq(variables['environment'], 'UAT')
+)
+in() approach
+in(
+  variables['environment'],
+  'DP01',
+  'DP05',
+  'UAT'
+)
+
+Think:
+
+in() = "Is this value inside my allowed list?"
+
+This is very useful when your pipeline has multiple environments.
+
+Q. Requirement : Run FeatureValidation stage only when the branch is feature/salesforce-login.
+
+- stage: FeatureValidation
+  dependsOn: Build
+  condition: contains(variables['Build.SourceBranch'], 'refs/heads/feature/salesforce-login')
+
+
+- stage: Deploy01
+  dependsOn: Test
+  condition: and(
+             succeeded(),
+             contains(variables['Build.SourceBranch'], 'refs/heads/feature')
+             )
+
+
+
+- stage: Deploy01
+  dependsOn: Test
+  condition: and(
+             succeeded(),
+             eq(variables['Build.SourceBranch'], 'refs/heads/feature')
+             )
+
+

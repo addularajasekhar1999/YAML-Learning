@@ -1,0 +1,30 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  environment: 'DP05'
+  appName: 'Salesforce'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BulidJob
+        steps:
+          - script: echo "Building the application..."
+            displayName: 'Build Step'
+  - stage: Test
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['environment'], 'DP05'))
+
+
+condition: and(
+  succeeded(),
+  or(
+    eq(variables['environment'], 'DP01'),
+    eq(variables['environment'], 'DP05')
+  ),
+    ne(variables['environment'], 'Production')
+  )

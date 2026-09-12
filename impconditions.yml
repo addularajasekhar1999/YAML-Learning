@@ -1,0 +1,370 @@
+1️⃣ succeeded() — MOST IMPORTANT
+condition: succeeded()
+
+Meaning:
+
+Run this only if the previous dependency succeeded.
+
+Salesforce:
+
+Build ✅
+   ↓
+Test
+
+If Build fails:
+
+Build ❌
+   ↓
+Test → SKIPPED
+Memory
+
+succeeded = "Previous step okay?"
+
+2️⃣ failed()
+condition: failed()
+
+Meaning:
+
+Run only when the previous dependency failed.
+
+Example:
+
+- stage: NotifyFailure
+  dependsOn: Test
+  condition: failed()
+
+Flow:
+
+Test ❌
+   ↓
+NotifyFailure ✅
+
+Useful for failure notifications / troubleshooting.
+
+3️⃣ always()
+condition: always()
+
+Meaning:
+
+Run regardless of success, failure, or cancellation.
+
+Example:
+
+- stage: Cleanup
+  condition: always()
+
+Think:
+
+"Whatever happens, cleanup."
+
+Very useful for cleanup/logging scenarios.
+
+4️⃣ succeededOrFailed()
+condition: succeededOrFailed()
+
+Meaning:
+
+Run if the previous work succeeded OR failed.
+
+So:
+
+Success → Run ✅
+Failure → Run ✅
+Cancelled → generally not equivalent to always
+
+Useful for things like publishing test results after tests finish.
+
+5️⃣ eq() ⭐
+
+eq = equal
+
+eq(variables['environment'], 'DP05')
+
+Read it like English:
+
+Is environment equal to DP05?
+
+If:
+
+environment: 'DP05'
+
+then:
+
+eq(DP05, DP05)
+      ↓
+     TRUE
+
+If:
+
+environment: 'Production'
+
+then:
+
+eq(Production, DP05)
+          ↓
+        FALSE
+Memory
+
+eq → equal
+
+6️⃣ ne() ⭐
+
+ne = not equal
+
+ne(variables['environment'], 'Production')
+
+Read:
+
+Is environment NOT Production?
+
+If:
+
+DP05 ≠ Production
+       ↓
+      TRUE
+
+If:
+
+Production ≠ Production
+             ↓
+           FALSE
+Memory
+
+ne → not equal
+
+7️⃣ and() ⭐⭐⭐
+
+This is extremely important.
+
+and(A, B)
+
+means:
+
+A AND B must BOTH be true.
+
+Example:
+
+condition: and(
+  succeeded(),
+  eq(variables['environment'], 'DP05')
+)
+
+Read it as:
+
+Test succeeded AND environment is DP05.
+
+Both must be true.
+
+Test	Environment	Result
+✅	DP05	✅ Run
+❌	DP05	❌
+✅	Production	❌
+❌	Production	❌
+Memory:
+
+AND = ALL must be true.
+
+8️⃣ or() ⭐⭐⭐
+
+or() means:
+
+At least ONE condition must be true.
+
+Example:
+
+or(
+  eq(variables['environment'], 'DP01'),
+  eq(variables['environment'], 'DP05')
+)
+
+Read:
+
+Environment is DP01 OR DP05.
+
+Environment	Result
+DP01	✅
+DP05	✅
+Production	❌
+🚨 Important
+
+This is what you got wrong earlier.
+
+❌ Don't write:
+
+eq(variables['environment'], 'DP01 or DP05')
+
+Because "DP01 or DP05" becomes one string.
+
+✅ Write:
+
+or(
+  eq(variables['environment'], 'DP01'),
+  eq(variables['environment'], 'DP05')
+)
+Memory:
+
+OR = ONE is enough.
+
+9️⃣ not()
+
+not() simply reverses the result.
+
+not(eq(variables['environment'], 'Production'))
+
+First:
+
+eq(DP05, Production)
+       ↓
+     FALSE
+
+Then:
+
+not(FALSE)
+    ↓
+   TRUE
+
+So:
+
+Environment is NOT Production.
+
+You could therefore express:
+
+ne(variables['environment'], 'Production')
+
+instead of:
+
+not(eq(variables['environment'], 'Production'))
+
+For simple cases, ne() is easier to read.
+
+🔟 in() ⭐⭐
+
+This one is useful when you have multiple allowed values.
+
+Instead of:
+
+or(
+  eq(variables['environment'], 'DP01'),
+  eq(variables['environment'], 'DP05'),
+  eq(variables['environment'], 'UAT')
+)
+
+you can use:
+
+in(
+  variables['environment'],
+  'DP01',
+  'DP05',
+  'UAT'
+)
+
+Meaning:
+
+Is environment one of these values?
+
+Memory
+
+IN = Is it in my list?
+
+1️⃣1️⃣ contains()
+
+Checks whether a string contains something.
+
+Example:
+
+contains(variables['Build.SourceBranch'], 'feature/')
+
+Meaning:
+
+Does the branch name contain feature/?
+
+For example:
+
+refs/heads/feature/salesforce-login
+
+→ TRUE.
+
+This becomes useful later for branch-based pipeline logic.
+
+🧠 The MOST important combination
+
+Now combine everything.
+
+Suppose:
+
+environment: 'DP05'
+
+We want:
+
+Test succeeded
+AND
+Environment is DP01 OR DP05
+AND
+Environment is NOT Production
+
+We build it piece by piece:
+
+Step 1
+succeeded()
+Step 2
+or(
+  eq(variables['environment'], 'DP01'),
+  eq(variables['environment'], 'DP05')
+)
+Step 3
+ne(variables['environment'], 'Production')
+Step 4 — combine with and()
+condition: and(
+  succeeded(),
+  or(
+    eq(variables['environment'], 'DP01'),
+    eq(variables['environment'], 'DP05')
+  ),
+  ne(variables['environment'], 'Production')
+)
+
+Read it like normal English:
+
+SUCCESS + (DP01 OR DP05) + NOT Production
+
+That's the mindset I want you to develop.
+
+🧩 Your memory cheat sheet
+
+Save this mentally:
+
+succeeded()          → Did it succeed?       ✅
+failed()             → Did it fail?         ❌
+always()             → Run anyway            🔄
+succeededOrFailed()  → Success OR failure    ⚡
+
+eq()                 → Equal                =
+ne()                 → Not equal            ≠
+
+and()                → ALL must be true      &&
+or()                 → ONE is enough         ||
+not()                → Reverse               !
+
+in()                 → Is it in this list?  📋
+contains()           → Does text contain?   🔎
+The golden rule 🔥
+
+When writing a condition, don't start by typing YAML.
+
+First say the requirement in English:
+
+"Deploy if tests succeed AND environment is DP01 or DP05."
+
+Then translate:
+
+AND
+├── succeeded()
+└── OR
+    ├── eq(DP01)
+    └── eq(DP05)
+
+Then write YAML.
+
+English → Logic → YAML
+
+That is how you'll become confident rather than memorizing syntax.
