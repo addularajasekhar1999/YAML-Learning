@@ -1,0 +1,128 @@
+trigger:
+  - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  environment: "DP05"
+
+stages:
+  - stage: Build
+    jobs: 
+      - job: BuildJob
+        steps: 
+          - script: echo "Build DP05"
+            displayName: "Building Application"
+
+  - stage: Test
+    dependsOn: "Build"
+    condition : succeeded()
+    jobs: 
+      - job: "Testing Job"
+        steps:
+          - script: echo "Testing Unitcases"
+            displayName: "Testing Build stage"
+
+  - stage: Deploy
+    dependsOn: "Test"
+    condition: succeeded()
+    jobs:
+      - job : "Deploy into DP05"    
+        steps:
+          - script : echo "Deploying into DP05"
+            displayName: "Deploying into DP05"
+
+
+---
+
+Variables - Start with these 5 types:
+
+
+Type -1 : Simple variable:
+
+variables:
+  appName: SalesforceApp
+  environment: dev
+  version: 1.0
+
+steps:
+  - script: |
+            echo "Application: $(appName)"
+            echo "Environment: $(environment)"
+            echo "Version: $(version)"
+
+
+
+Type -2 : Variable at stage level
+
+stages:
+  - stage: Build
+    variables: 
+      environment: dev
+    jobs:
+      - job: BuildJob
+        steps:
+          - script: echo "Environment: $(environment)"
+
+
+Type - 3 : Variable at job level
+
+stages:
+  - stage: Build
+    jobs:
+      - job: BuildJob
+        variables:
+          environment: dev
+        steps:
+          - script: echo "Environment: $(environment)"
+
+Most Important part : Parameters
+
+Basic Syntax:
+
+parameters:
+- name: environment
+  type: string
+  default: dev      
+
+              #${{parameters.environment}}
+
+- script: echo "Deploying to ${{parameters.enviroment}}"
+
+
+String parameters:
+
+parameters:
+- name: environment
+  type: string
+  default: dev
+  values:
+  - dev
+  - uat
+  - prod
+
+Boolen parameters:
+
+parameters:
+- name: environment
+  type: boolean
+  default: false
+
+ex: 
+- script: echo " Deploying to DPO1"
+  condition: eq("${{parameters.deploy}}", "true")
+
+Number Parameters:
+
+parameters:
+- name: environment
+  type: number
+  default: dev
+
+
+
+
+
+
+  
